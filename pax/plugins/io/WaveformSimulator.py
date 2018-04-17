@@ -337,10 +337,10 @@ class WaveformSimulator(plugin.InputPlugin):
         if len(instructions):
             self.s2_after_pulses(g4_id=q['g4_id'])
 
-        event = self.simulator.make_pax_event()
-        if hasattr(self, 'dataset_name'):
-            event.dataset_name = self.dataset_name
-        event.event_number = self.current_event
+        # event = self.simulator.make_pax_event()
+        # if hasattr(self, 'dataset_name'):
+        #    event.dataset_name = self.dataset_name
+        # event.event_number = self.current_event
 
         # Add start time offset to all peak start times in the truth file
         # Can't be done at the time of peak creation, it is only known now...
@@ -352,7 +352,7 @@ class WaveformSimulator(plugin.InputPlugin):
                         continue
                     p[key] += self.config['event_padding']
         self.all_truth_peaks.extend(self.truth_peaks)
-
+        # return event
         return EventProxy(event_number=self.current_event,
                           block_id=-1,
                           data=dict(arrival_times_per_channel=self.simulator.arrival_times_per_channel,
