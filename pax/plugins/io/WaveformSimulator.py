@@ -445,6 +445,7 @@ class WaveformSimulatorFromMC(WaveformSimulator):
         self.config.setdefault('add_to_z', 0)
         self.log.warning('This plugin is completely untested and will probably crash!')
         filename = self.config['input_name']
+        self.dataset_name = os.path.basename(filename)
 
         self.f = ROOT.TFile(utils.data_file_name(filename))
         self.t = self.f.Get("events/events")  # new MC structure, 160622
