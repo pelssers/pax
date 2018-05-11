@@ -8,8 +8,7 @@ class AdHocClassification1T(plugin.TransformPlugin):
         self.s1_rise_time_bound = interpolate.interp1d([0, 5, 10, 100],
                                                        [70, 70, 70, 70],
                                                        fill_value='extrapolate', kind='linear')
-        self.s1_rise_time_aft = interpolate.interp1d([0, 0.4, 0.5, 0.6, 0.70, 0.70, 1.0],
-                                                     [70, 70, 68, 65, 60, 0, 0], kind='linear')
+
         self.tight_coincidence_threshold = self.config['tight_coincidence_threshold']
 
     def transform_event(self, event):
@@ -31,14 +30,8 @@ class AdHocClassification1T(plugin.TransformPlugin):
                 if peak.tight_coincidence < self.tight_coincidence_threshold:
                     # Too few PMTs contributing, hard to distinguish from junk
                     peak.type = 'unknown'
-                elif peak.area > 100:
-                    # Apply single electron s2 cut only in 5 - 100 PE range, otherwise only rely on rise time
-                    peak.type = 's1'
-                elif -peak.area_decile_from_midpoint[1] < self.s1_rise_time_aft(peak.area_fraction_top):
-                    # Rise time and AFT as multi-dimensional discriminator
-                    peak.type = 's1'
                 else:
-                    peak.type = 's2'
+                    peak.type = 's1'
             else:
                 # No fast rise
                 if peak.n_contributing_channels > 4:
