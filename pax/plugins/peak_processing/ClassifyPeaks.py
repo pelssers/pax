@@ -1,14 +1,11 @@
 from pax import plugin, units
-from scipy import interpolate
 
 
 class AdHocClassification1T(plugin.TransformPlugin):
 
     def startup(self):
-        self.s1_rise_time_bound = interpolate.interp1d([0, 5, 10, 100],
-                                                       [70, 70, 70, 70],
-                                                       fill_value='extrapolate', kind='linear')
-
+        self.s1_rise_time_bound = self.config['s1_risetime_threshold']
+        self.s1_width_bound = self.config['s1_width_threshold']
         self.tight_coincidence_threshold = self.config['tight_coincidence_threshold']
 
     def transform_event(self, event):
@@ -17,25 +14,25 @@ class AdHocClassification1T(plugin.TransformPlugin):
             # Don't work on noise and lone hit
             if peak.type in ('noise', 'lone_hit'):
                 continue
-            # rounding peak aft
+            # rounding peak aft, for future usage like BDT based classification
             if peak.area_fraction_top < 0:
                 peak.area_fraction_top = 0
             elif peak.area_fraction_top > 1:
                 peak.area_fraction_top = 1
 
             # classification based on rise_time and aft
-            if -peak.area_decile_from_midpoint[1] < self.s1_rise_time_bound(peak.area)\
-                    and peak.range_area_decile[9] < 300:
+            if -peak.area_decile_from_midpoint[1] < self.s1_rise_time_bound\
+                    and peak.range_area_decile[9] < self.s1_width_bound:
                 # S1 requirements: Peak rises fast, and width (90p area) small
-                if peak.tight_coincidence < self.tight_coincidence_threshold:
+                if peak.tight_coincidence >= self.tight_coincidence_threshold:
+                    peak.type = 's1'
+                else:
                     # Too few PMTs contributing, hard to distinguish from junk
                     peak.type = 'unknown'
-                else:
-                    peak.type = 's1'
             else:
                 # No fast rise
-                if peak.n_contributing_channels > 4:
-                    # Large enough: can be S2
+                if peak.n_contributing_channels >= 4:
+                    # Large enough to be considered as S2
                     peak.type = 's2'
                 else:
                     # Too few contributing channels, not really S2

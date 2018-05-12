@@ -19,8 +19,8 @@ class GapSizeClustering(plugin.ClusteringPlugin):
         self.gap_threshold = self.config['max_gap_size_in_cluster'] / self.dt
 
         # Rise time bound
-        self.s1_rise_time_bound = 70  # 70ns as rise_time cut
-        self.s1_width_bound = 300  # 300 ns as width cut
+        self.s1_rise_time_bound = self.config['s1_risetime_threshold']  # 70ns as rise_time cut
+        self.s1_width_bound = self.config['s1_width_threshold']  # 300 ns as width cut
 
     @staticmethod
     def iterate_gap_clusters(hits, gap_threshold):
